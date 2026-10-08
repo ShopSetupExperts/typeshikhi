@@ -52,7 +52,7 @@ export const BIJOY_KEYMAP: Record<string, KeyDef> = {
   Backslash: { code: 'Backslash', normal: '\\', shift: '|', labelEn: '\\', finger: 'right-pinky', hand: 'right', row: 1 },
 
   // Row 2 - Home Row
-  KeyA: { code: 'KeyA', normal: 'ৃ', shift: 'ঋ', labelEn: 'A', finger: 'left-pinky', hand: 'left', row: 2 },
+  KeyA: { code: 'KeyA', normal: 'ৃ', shift: 'র্', labelEn: 'A', finger: 'left-pinky', hand: 'left', row: 2 },
   KeyS: { code: 'KeyS', normal: 'ু', shift: 'ূ', labelEn: 'S', finger: 'left-ring', hand: 'left', row: 2 },
   KeyD: { code: 'KeyD', normal: 'ি', shift: 'ী', labelEn: 'D', finger: 'left-middle', hand: 'left', row: 2 },
   KeyF: { code: 'KeyF', normal: 'া', shift: 'অ', labelEn: 'F', finger: 'left-index', hand: 'left', row: 2 },
@@ -65,7 +65,7 @@ export const BIJOY_KEYMAP: Record<string, KeyDef> = {
   Quote: { code: 'Quote', normal: '\'', shift: '"', labelEn: '\'', finger: 'right-pinky', hand: 'right', row: 2 },
 
   // Row 3 - Bottom Row
-  KeyZ: { code: 'KeyZ', normal: '্র', shift: 'র্', labelEn: 'Z', finger: 'left-pinky', hand: 'left', row: 3 },
+  KeyZ: { code: 'KeyZ', normal: '্র', shift: '্য', labelEn: 'Z', finger: 'left-pinky', hand: 'left', row: 3 },
   KeyX: { code: 'KeyX', normal: 'ও', shift: 'ৗ', labelEn: 'X', finger: 'left-ring', hand: 'left', row: 3 },
   KeyC: { code: 'KeyC', normal: 'ে', shift: 'ৈ', labelEn: 'C', finger: 'left-middle', hand: 'left', row: 3 },
   KeyV: { code: 'KeyV', normal: 'র', shift: 'ল', labelEn: 'V', finger: 'left-index', hand: 'left', row: 3 },
@@ -74,7 +74,7 @@ export const BIJOY_KEYMAP: Record<string, KeyDef> = {
   KeyM: { code: 'KeyM', normal: 'ম', shift: 'শ', labelEn: 'M', finger: 'right-index', hand: 'right', row: 3 },
   Comma: { code: 'Comma', normal: ',', shift: '<', labelEn: ',', finger: 'right-middle', hand: 'right', row: 3 },
   Period: { code: 'Period', normal: '.', shift: '>', labelEn: '.', finger: 'right-ring', hand: 'right', row: 3 },
-  Slash: { code: 'Slash', normal: '/', shift: '?', labelEn: '/', finger: 'right-pinky', hand: 'right', row: 3 },
+  Slash: { code: 'Slash', normal: 'ঃ', shift: 'ৎ', labelEn: '/', finger: 'right-pinky', hand: 'right', row: 3 },
 
   // Row 4 - Space
   Space: { code: 'Space', normal: ' ', shift: ' ', labelEn: 'Space', finger: 'thumb', hand: 'left', row: 4 }

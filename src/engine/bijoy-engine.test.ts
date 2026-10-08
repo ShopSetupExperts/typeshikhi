@@ -180,10 +180,35 @@ export function runEngineTests(): { passed: number; failed: number; results: Arr
     {
       name: 'Swaroborno Word: ঋতু (Season)',
       keys: [
-        { code: 'KeyA', shift: true }, // ঋ
+        { code: 'KeyG' }, { code: 'KeyA' }, // ঋ (G + A in Bijoy)
         { code: 'KeyK' }, { code: 'KeyS' } // তু
       ],
       expected: 'ঋতু'
+    },
+    {
+      name: 'Reph via Shift+A: র্ক (Rko)',
+      keys: [{ code: 'KeyA', shift: true }, { code: 'KeyJ' }],
+      expected: 'র্ক'
+    },
+    {
+      name: 'Ya-fola via Shift+Z: ক্য (Kya)',
+      keys: [{ code: 'KeyJ' }, { code: 'KeyZ', shift: true }],
+      expected: 'ক্য'
+    },
+    {
+      name: 'Bisorgo via Slash: ঃ',
+      keys: [{ code: 'Slash' }],
+      expected: 'ঃ'
+    },
+    {
+      name: 'Khanda-ta via Shift+Slash: ৎ',
+      keys: [{ code: 'Slash', shift: true }],
+      expected: 'ৎ'
+    },
+    {
+      name: 'Pre-kar wrapping Ro-fola: প্রেম',
+      keys: [{ code: 'KeyC' }, { code: 'KeyR' }, { code: 'KeyZ' }, { code: 'KeyM' }],
+      expected: 'প্রেম'
     },
     {
       name: 'Swaroborno Word: একতা (Unity)',

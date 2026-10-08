@@ -97,12 +97,12 @@ export const CURRICULUM: LevelCategory[] = [
         titleBn: 'উচ্চতর স্বরবর্ণ',
         category: 'drill',
         descriptionEn: 'Learn to type ঋ, এ, ঐ, ও, ঔ.',
-        descriptionBn: 'ঋ (Shift+A), এ (G+C), ঐ (G+Shift+C), ও (X), ঔ (G+Shift+X)।',
+        descriptionBn: 'ঋ (G+A), এ (G+C), ঐ (G+Shift+C), ও (X), ঔ (G+Shift+X)।',
         targetText: 'ঋ এ ঐ ও ঔ ঋ এ ঐ ও ঔ ঋ এ ঐ ও ঔ',
-        keysTaught: ['KeyA', 'KeyC', 'KeyX', 'KeyG'],
+        keysTaught: ['KeyG', 'KeyA', 'KeyC', 'KeyX'],
         passAccuracy: 90,
-        tipEn: 'ও is typed directly with X. ঋ is Shift+A. The rest use G + Kar.',
-        tipBn: 'ও লিখতে সরাসরি X চাপুন। ঋ লিখতে Shift+A চাপুন। বাকিগুলোতে G ব্যবহার করুন।'
+        tipEn: 'ও is typed directly with X. The rest (ঋ, এ, ঐ, ঔ) use G + Kar. ঋ is G + A.',
+        tipBn: 'ও লিখতে সরাসরি X চাপুন। বাকি সবগুলো স্বরবর্ণে (ঋ, এ, ঐ, ঔ) প্রথমে G ব্যবহার করুন। ঋ লিখতে G+A চাপুন।'
       }
     ]
   },
@@ -169,10 +169,10 @@ export const CURRICULUM: LevelCategory[] = [
         descriptionEn: 'Type য র ল শ ষ স হ ড় ঢ় য় ৎ ং ঃ ঁ.',
         descriptionBn: 'য র ল শ ষ স হ ড় ঢ় য় ৎ ং ঃ ঁ অনুশীলন করুন।',
         targetText: 'য র ল শ ষ স হ ড় ঢ় য় ৎ ং ঃ ঁ',
-        keysTaught: ['KeyW', 'KeyV', 'KeyM', 'KeyN', 'KeyI', 'KeyP', 'KeyQ'],
+        keysTaught: ['KeyW', 'KeyV', 'KeyM', 'KeyN', 'KeyI', 'KeyP', 'Slash', 'KeyQ', 'Digit7'],
         passAccuracy: 90,
-        tipEn: 'ল is Shift+V. শ is Shift+M. ষ is Shift+N.',
-        tipBn: 'ল (Shift+V), শ (Shift+M) এবং ষ (Shift+N) এর অবস্থান মনে রাখুন।'
+        tipEn: 'ল is Shift+V. শ is Shift+M. ষ is Shift+N. ঃ is Slash (/), ৎ is Shift+Slash (?).',
+        tipBn: 'ল (Shift+V), শ (Shift+M), ষ (Shift+N), ঃ (/) এবং ৎ (Shift+/) এর অবস্থান মনে রাখুন।'
       }
     ]
   },
@@ -400,24 +400,24 @@ export const CURRICULUM: LevelCategory[] = [
     level: 7,
     nameEn: 'Shift Layer Mastery',
     nameBn: 'শিফট লেয়ারের যুক্তবর্ণ ও বর্ণ',
-    summaryEn: 'Master shifted characters: ঋ অ ভ খ থ ধ ঢ ঠ ছ ঝ ঞ ঘ ফ ণ ষ শ ং ঃ ঁ ঔ ৈ ূ ী',
-    summaryBn: 'শিফট কী চেপে টাইপ করার মহোৎসব: ঋ অ ভ খ থ ধ ঢ ঠ ছ ঝ ঞ ঘ ফ ণ ষ শ ং ঃ ঁ',
+    summaryEn: 'Master shifted characters: অ ভ খ থ ধ ঢ ঠ ছ ঝ ঞ ঘ ফ ণ ষ শ ং ঃ ঁ ঔ ৈ ূ ী',
+    summaryBn: 'শিফট কী চেপে টাইপ করার কৌশল: অ ভ খ থ ধ ঢ ঠ ছ ঝ ঞ ঘ ফ ণ ষ শ ং ঃ ঁ',
     iconName: 'Sparkles',
     lessons: [
       {
         id: 'l7-1',
         level: 7,
         subIndex: 1,
-        titleEn: 'Shifted Home Row (ঋ অ ভ খ থ ধ)',
-        titleBn: 'শিফটেড হোম রো বর্ণসমূহ',
+        titleEn: 'Shifted Home Row (অ ভ খ থ ধ)',
+        titleBn: 'শিফটেড হোম রো (অ ভ খ থ ধ)',
         category: 'drill',
-        descriptionEn: 'Learn Shift + A/S/D/F/G/H/J/K/L combinations.',
-        descriptionBn: 'Shift চেপে হোম রো-এর গুরুত্বপূর্ণ বর্ণসমূহ অনুশীলন করুন।',
-        targetText: 'অ আ ই উ ঋ ভ খ থ ধ অমর ঋতু ভূত দীপ ভালো খবর থানা ধান',
-        keysTaught: ['KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL'],
+        descriptionEn: 'Learn Shift + F/H/J/K/L combinations on the Home Row.',
+        descriptionBn: 'Shift চেপে হোম রো-এর বর্ণসমূহ (অ ভ খ থ ধ ী ূ) অনুশীলন করুন।',
+        targetText: 'অ ভ খ থ ধ অ ভ খ থ ধ অমর ভূত দীপ ভালো খবর থানা ধান আধিপত্য',
+        keysTaught: ['KeyF', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'KeyD', 'KeyS'],
         passAccuracy: 90,
-        tipEn: ' অ is Shift+F. ী is Shift+D. খ is Shift+J. ভ is Shift+H.',
-        tipBn: 'অ = Shift+F, ী = Shift+D, খ = Shift+J, ভ = Shift+H।'
+        tipEn: 'অ is Shift+F. ী is Shift+D. ূ is Shift+S. খ is Shift+J. ভ is Shift+H. ধ is Shift+L.',
+        tipBn: 'অ = Shift+F, ী = Shift+D, ূ = Shift+S, খ = Shift+J, ভ = Shift+H, ধ = Shift+L।'
       },
       {
         id: 'l7-2',
@@ -526,8 +526,8 @@ export const CURRICULUM: LevelCategory[] = [
         targetText: 'কোকিল গোলাপ নৌকা মৌমাছি গৌতম সৌরভ ছোট লোক বোন শোক',
         keysTaught: ['KeyC', 'KeyF', 'KeyX'],
         passAccuracy: 92,
-        tipEn: 'For গোলাপ: Type C (ে) -> O (গ) -> F (া) -> L (ল) -> F (া) -> R (প).',
-        tipBn: 'গোলাপ: C (ে) -> O (গ) -> F (া) -> V (ল/Shift+V) -> F (া) -> R (প)।'
+        tipEn: 'For গোলাপ: Type C (ে) -> O (গ) -> F (া) -> Shift+V (ল) -> F (া) -> R (প).',
+        tipBn: 'গোলাপ: C (ে) -> O (গ) -> F (া) -> Shift+V (ল) -> F (া) -> R (প)।'
       },
       {
         id: 'l9-3',
@@ -536,13 +536,13 @@ export const CURRICULUM: LevelCategory[] = [
         titleEn: 'Fola: Ro-fola (্র), Ya-fola (্য) & Reph (র্)',
         titleBn: 'ফলা: র-ফলা (্র), য-ফলা (্য) ও রেফ (র্)',
         category: 'words',
-        descriptionEn: 'Practice Ro-fola (Z), Ya-fola (G+W), and Reph (Shift+Z before consonant).',
-        descriptionBn: 'র-ফলা (Z), য-ফলা (G+W) এবং রেফ (Shift+Z বর্ণের পূর্বে)।',
+        descriptionEn: 'Practice Ro-fola (Z), Ya-fola (Shift+Z or G+W), and Reph (Shift+A before consonant).',
+        descriptionBn: 'র-ফলা (Z), য-ফলা (Shift+Z বা G+W) এবং রেফ (Shift+A বর্ণের পূর্বে)।',
         targetText: 'গ্রাম প্রথম ছাত্র বর্ণ সূর্য কর্ম খ্যাতি ব্যাকরণ বাক্য ব্যক্তিত্ব',
-        keysTaught: ['KeyZ', 'KeyW'],
+        keysTaught: ['KeyZ', 'KeyA', 'KeyW'],
         passAccuracy: 92,
-        tipEn: 'For বর্ণ: H (ব) -> Shift+Z (র্) -> Shift+B (ণ). For গ্রাম: O (গ) -> Z (্র) -> F (া) -> M (ম).',
-        tipBn: 'রেফ বর্ণের আগে টাইপ করতে হয় (Shift+Z), আর র-ফলা বর্ণের পরে (Z)।'
+        tipEn: 'For বর্ণ: H (ব) -> Shift+A (র্) -> Shift+B (ণ). For গ্রাম: O (গ) -> Z (্র) -> F (া) -> M (ম).',
+        tipBn: 'রেফ বর্ণের আগে টাইপ করতে হয় (Shift+A), র-ফলা বর্ণের পরে (Z), এবং য-ফলা বর্ণের পরে (Shift+Z)।'
       }
     ]
   },

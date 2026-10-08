@@ -215,7 +215,7 @@ export const SpeedTestView: React.FC<SpeedTestViewProps> = ({
         (expectedStep.shift === undefined || expectedStep.shift === e.shiftKey)
       );
 
-      engineRef.current.processKey(e.code, e.shiftKey);
+      engineRef.current.processKey(e.code, e.shiftKey, expectedStep?.char);
       const fullText = engineRef.current.getBuffer();
       const newTyped = BijoyEngine.splitGraphemes(fullText);
       const targetChar = targetGraphemes[currentGraphemeIndex];

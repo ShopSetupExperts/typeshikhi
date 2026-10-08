@@ -183,7 +183,7 @@ export const LessonView: React.FC<LessonViewProps> = ({
         (expectedStep.shift === undefined || expectedStep.shift === e.shiftKey)
       );
 
-      engineRef.current.processKey(e.code, e.shiftKey);
+      engineRef.current.processKey(e.code, e.shiftKey, expectedStep?.char);
       const pendingState = engineRef.current.getPendingState();
       setPendingPreKar(pendingState.kar);
 

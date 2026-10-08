@@ -1,5 +1,12 @@
 import { BIJOY_KEYMAP } from './bijoy-layout';
 
+export function normalizeBangla(text: string): string {
+  return text
+    .replace(/\u09A1\u09BC/g, 'ড়')
+    .replace(/\u09A2\u09BC/g, 'ঢ়')
+    .replace(/\u09AF\u09BC/g, 'য়');
+}
+
 export interface KeyStep {
   code: string;
   shift: boolean;
@@ -73,7 +80,7 @@ export class BijoyEngine {
    * Processes a physical key press and updates internal buffer.
    * Returns the updated full text and the newly produced characters if any.
    */
-  public processKey(code: string, shift: boolean): { fullText: string; emitted: string; action: string } {
+  public processKey(code: string, shift: boolean, expectedChar?: string): { fullText: string; emitted: string; action: string } {
     const keyDef = BIJOY_KEYMAP[code];
     if (!keyDef) {
       if (code === 'Backspace') {
@@ -85,7 +92,10 @@ export class BijoyEngine {
       return { fullText: this.buffer, emitted: '', action: 'ignored' };
     }
 
-    const rawChar = shift ? keyDef.shift : keyDef.normal;
+    let rawChar = shift ? keyDef.shift : keyDef.normal;
+    if (code === 'Slash' && shift && expectedChar === '?') {
+      rawChar = '?';
+    }
     this.keyHistory.push({ code, shift, output: rawChar });
 
     // Handle spacebar
@@ -124,6 +134,7 @@ export class BijoyEngine {
           this.buffer = this.buffer.slice(0, -1);
         }
         this.buffer += vowel;
+        this.buffer = normalizeBangla(this.buffer);
         return { fullText: this.buffer, emitted: vowel, action: 'swaroborno' };
       }
     }
@@ -143,7 +154,7 @@ export class BijoyEngine {
       }
 
       // If buffer is empty or ends with whitespace/punctuation
-      if (this.buffer.length === 0 || /[\s।,\.;:!?\-\(\)\[\]]/.test(this.buffer.slice(-1))) {
+      if (this.buffer.length === 0 || /[\s।,;:!?\-()[\]]/.test(this.buffer.slice(-1))) {
         return { fullText: this.buffer, emitted: '', action: 'linker_pending' };
       }
 
@@ -152,29 +163,43 @@ export class BijoyEngine {
       return { fullText: this.buffer, emitted: '্', action: 'hasant' };
     }
 
-
-
     // 2. Pre-kar capture: ি (D), ে (C), ৈ (Shift+C)
     if ((code === 'KeyD' && !shift) || (code === 'KeyC' && !shift) || (code === 'KeyC' && shift)) {
       this.pendingKar = rawChar;
       return { fullText: this.buffer, emitted: '', action: 'prekar_pending' };
     }
 
-    // 3. Reph capture: র্ (Shift+KeyZ)
-    if (code === 'KeyZ' && shift) {
+    // 3. Reph capture: র্ (Shift+A in standard Bijoy; also support Shift+Z when typed before consonant for backward compat)
+    if ((code === 'KeyA' && shift) || (code === 'KeyZ' && shift && (this.buffer.length === 0 || /[\s।,;:!?\-()[\]]/.test(this.buffer.slice(-1))))) {
       this.pendingReph = true;
       return { fullText: this.buffer, emitted: '', action: 'reph_pending' };
     }
 
     // 4. Ro-fola: ্র (KeyZ normal)
     if (code === 'KeyZ' && !shift) {
-      // Append ro-fola (্ + র)
-      const roFola = '্র'; // or '্' + 'র'
+      const lastChar = this.buffer.slice(-1);
+      if (lastChar === 'ি' || lastChar === 'ে' || lastChar === 'ৈ') {
+        // Detach pre-kar, append ro-fola, re-attach pre-kar
+        this.buffer = this.buffer.slice(0, -1) + '্' + 'র' + lastChar;
+        return { fullText: this.buffer, emitted: '্র', action: 'rofola' };
+      }
       this.buffer += '্' + 'র';
-      return { fullText: this.buffer, emitted: roFola, action: 'rofola' };
+      return { fullText: this.buffer, emitted: '্র', action: 'rofola' };
     }
 
-    // 5. Composite vowel check: if buffer ends with consonant + ে and user presses া (F) -> ো
+    // 5. Ya-fola: ্য (KeyZ shift)
+    if (code === 'KeyZ' && shift) {
+      const lastChar = this.buffer.slice(-1);
+      if (lastChar === 'ি' || lastChar === 'ে' || lastChar === 'ৈ') {
+        // Detach pre-kar, append ya-fola, re-attach pre-kar
+        this.buffer = this.buffer.slice(0, -1) + '্' + 'য' + lastChar;
+        return { fullText: this.buffer, emitted: '্য', action: 'yafola' };
+      }
+      this.buffer += '্' + 'য';
+      return { fullText: this.buffer, emitted: '্য', action: 'yafola' };
+    }
+
+    // 6. Composite vowel check: if buffer ends with consonant + ে and user presses া (F) -> ো
     if (code === 'KeyF' && !shift) {
       if (this.buffer.endsWith('ে')) {
         // Replace previous ে with ো
@@ -183,7 +208,7 @@ export class BijoyEngine {
       }
     }
 
-    // 6. Composite vowel check: if buffer ends with consonant + ে and user presses ৗ (Shift+X) -> ৌ
+    // 7. Composite vowel check: if buffer ends with consonant + ে and user presses ৗ (Shift+X) -> ৌ
     if (code === 'KeyX' && shift) {
       if (this.buffer.endsWith('ে')) {
         this.buffer = this.buffer.slice(0, -1) + 'ৌ';
@@ -191,7 +216,7 @@ export class BijoyEngine {
       }
     }
 
-    // 7. Standard Consonant / Vowel / Symbol handling
+    // 8. Standard Consonant / Vowel / Symbol handling
     let toEmit = rawChar;
 
     // Apply pending Reph if any
@@ -208,7 +233,7 @@ export class BijoyEngine {
 
     this.hasantActive = false;
     this.buffer += toEmit;
-    this.buffer = this.buffer.normalize('NFC');
+    this.buffer = normalizeBangla(this.buffer);
 
     return { fullText: this.buffer, emitted: toEmit, action: 'char' };
   }
@@ -254,23 +279,34 @@ export class BijoyEngine {
    * Splits Bangla text into grapheme clusters using Intl.Segmenter with fallback.
    */
   public static splitGraphemes(text: string): string[] {
+    const norm = normalizeBangla(text);
     if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
       const SegmenterClass = (Intl as unknown as { Segmenter: new (loc: string, opt: { granularity: string }) => { segment: (t: string) => Iterable<{ segment: string }> } }).Segmenter;
       const segmenter = new SegmenterClass('bn', { granularity: 'grapheme' });
-      const segments = Array.from(segmenter.segment(text), (s: { segment: string }) => s.segment);
+      const rawSegments = Array.from(segmenter.segment(norm), (s: { segment: string }) => s.segment);
+      const segments: string[] = [];
+      for (const seg of rawSegments) {
+        if (seg.startsWith(' ') && seg.length > 1) {
+          segments.push(' ');
+          segments.push(seg.slice(1));
+        } else {
+          segments.push(seg);
+        }
+      }
       return segments;
     }
 
     // Comprehensive fallback for Bangla regex-based grapheme clustering
     const regex = /[\u0980-\u09FF][\u09BC]?([\u09CD][\u0980-\u09FF][\u09BC]?)*[\u09BE-\u09CC\u09D7]?[\u0981-\u0983]?|[^\u0980-\u09FF]/g;
-    const matches = text.match(regex);
-    return matches || Array.from(text);
+    const matches = norm.match(regex);
+    return matches || Array.from(norm);
   }
 
   /**
    * Solves the exact physical Bijoy keystroke steps needed to type a given Bangla grapheme cluster.
    */
-  public static solveKeystrokesForGrapheme(grapheme: string): KeyStep[] {
+  public static solveKeystrokesForGrapheme(rawGrapheme: string): KeyStep[] {
+    const grapheme = normalizeBangla(rawGrapheme);
     const steps: KeyStep[] = [];
 
     // Common full Swaroborno mappings
@@ -296,7 +332,11 @@ export class BijoyEngine {
         { code: 'KeyG', shift: false, char: '্', label: 'G', description: 'লিংকার' },
         { code: 'KeyS', shift: true, char: 'ূ', label: 'Shift + S', description: 'ূ-কার' }
       ],
-      'ঋ': [{ code: 'KeyA', shift: true, char: 'ঋ', label: 'Shift + A', description: 'ঋ' }],
+      // In Bijoy, ঋ is typed as G + A (Linker + Ri-kar)
+      'ঋ': [
+        { code: 'KeyG', shift: false, char: '্', label: 'G', description: 'লিংকার' },
+        { code: 'KeyA', shift: false, char: 'ৃ', label: 'A', description: 'ৃ-কার' }
+      ],
       'এ': [
         { code: 'KeyG', shift: false, char: '্', label: 'G', description: 'লিংকার' },
         { code: 'KeyC', shift: false, char: 'ে', label: 'C', description: 'ে-কার' }
@@ -331,9 +371,11 @@ export class BijoyEngine {
       '্': { code: 'KeyG', shift: false, char: '্', label: 'G' },
       '।': { code: 'KeyG', shift: true, char: '।', label: 'Shift + G' },
       'ং': { code: 'KeyQ', shift: true, char: 'ং', label: 'Shift + Q' },
-      'ঃ': { code: 'Quote', shift: false, char: 'ঃ', label: '\'' },
+      'ঃ': { code: 'Slash', shift: false, char: 'ঃ', label: '/' },
+      'ৎ': { code: 'Slash', shift: true, char: 'ৎ', label: 'Shift + /' },
       'ঁ': { code: 'Digit7', shift: true, char: 'ঁ', label: 'Shift + 7' },
-      ' ': { code: 'Space', shift: false, char: ' ', label: 'Space' }
+      ' ': { code: 'Space', shift: false, char: ' ', label: 'Space' },
+      '?': { code: 'Slash', shift: true, char: '?', label: 'Shift + /' }
     };
 
     if (standaloneMap[grapheme]) {
@@ -351,9 +393,9 @@ export class BijoyEngine {
     const hasOkar = working.includes('ো');
     const hasOukar = working.includes('ৌ');
 
-    // 1. If Reph exists, Bijoy types Reph first (Shift + Z)
+    // 1. If Reph exists, Bijoy types Reph first (Shift + A in standard Bijoy)
     if (hasReph) {
-      steps.push({ code: 'KeyZ', shift: true, char: 'র্', label: 'Shift + Z', description: 'রেফ' });
+      steps.push({ code: 'KeyA', shift: true, char: 'র্', label: 'Shift + A', description: 'রেফ' });
     }
 
     // 2. If Pre-kar exists (or composite O/OU that starts with E-kar), Bijoy types the Pre-kar first!
@@ -388,13 +430,36 @@ export class BijoyEngine {
     while (i < codeUnits.length) {
       const char = codeUnits[i];
       if (char === '্') {
-        // Hasant joiner
+        // If next is ya (্য), Bijoy uses Shift + Z
+        if (i + 1 < codeUnits.length && codeUnits[i + 1] === 'য') {
+          steps.push({ code: 'KeyZ', shift: true, char: '্য', label: 'Shift + Z', description: 'য-ফলা' });
+          i += 2;
+          continue;
+        }
+        // If next is ro (্র), Bijoy uses KeyZ
+        if (i + 1 < codeUnits.length && codeUnits[i + 1] === 'র') {
+          steps.push({ code: 'KeyZ', shift: false, char: '্র', label: 'Z', description: 'র-ফলা' });
+          i += 2;
+          continue;
+        }
+        // General hasant joiner
         steps.push({ code: 'KeyG', shift: false, char: '্', label: 'G', description: 'হসন্ত' });
         i++;
         continue;
       }
 
-      // Check if this is a Ro-fola: if prev was '্' and this is 'র', user could also press 'Z'
+      if (char === '্র') {
+        steps.push({ code: 'KeyZ', shift: false, char: '্র', label: 'Z', description: 'র-ফলা' });
+        i++;
+        continue;
+      }
+
+      if (char === '্য') {
+        steps.push({ code: 'KeyZ', shift: true, char: '্য', label: 'Shift + Z', description: 'য-ফলা' });
+        i++;
+        continue;
+      }
+
       const keyStep = BijoyEngine.findKeyForChar(char);
       if (keyStep) {
         steps.push(keyStep);
@@ -419,7 +484,7 @@ export class BijoyEngine {
 
     // 6. Modifier (ঁ, ং, ঃ)
     if (modifier) {
-      const modStep = BijoyEngine.findKeyForChar(modifier);
+      const modStep = standaloneMap[modifier] || BijoyEngine.findKeyForChar(modifier);
       if (modStep) steps.push(modStep);
     }
 
@@ -427,6 +492,15 @@ export class BijoyEngine {
   }
 
   public static findKeyForChar(char: string): KeyStep | null {
+    if (char === 'ড়' || char === '\u09A1\u09BC') {
+      return { code: 'KeyP', shift: false, char: 'ড়', label: 'P' };
+    }
+    if (char === 'ঢ়' || char === '\u09A2\u09BC') {
+      return { code: 'KeyP', shift: true, char: 'ঢ়', label: 'Shift + P' };
+    }
+    if (char === 'য়' || char === '\u09AF\u09BC') {
+      return { code: 'KeyW', shift: true, char: 'য়', label: 'Shift + W' };
+    }
     for (const [code, key] of Object.entries(BIJOY_KEYMAP)) {
       if (key.normal === char) {
         return { code, shift: false, char, label: key.labelEn };

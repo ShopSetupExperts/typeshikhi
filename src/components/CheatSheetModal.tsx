@@ -17,7 +17,7 @@ export const CheatSheetModal: React.FC<CheatSheetModalProps> = ({ isBn, onClose 
     { char: 'ঈ', keys: 'G + Shift + D', desc: 'লিংকার G + ী-কার' },
     { char: 'উ', keys: 'G + S', desc: 'লিংকার G + ু-কার' },
     { char: 'ঊ', keys: 'G + Shift + S', desc: 'লিংকার G + ূ-কার' },
-    { char: 'ঋ', keys: 'Shift + A (বা G + A)', desc: 'সরাসরি শিফট এ' },
+    { char: 'ঋ', keys: 'G + A', desc: 'লিংকার G + ৃ-কার A' },
     { char: 'এ', keys: 'G + C', desc: 'লিংকার G + ে-কার' },
     { char: 'ঐ', keys: 'G + Shift + C', desc: 'লিংকার G + ৈ-কার' },
     { char: 'ও', keys: 'X (বা G + X)', desc: 'সরাসরি X কী' },
@@ -57,7 +57,8 @@ export const CheatSheetModal: React.FC<CheatSheetModalProps> = ({ isBn, onClose 
     { name: 'ও-কার (ো)', char: 'ো', key: 'C + বর্ণ + F', rule: '⚡ যৌগিক: C (ে) চেপে বর্ণ চেপে F (া) চাপলে ো হয় (যেমন: কো)' },
     { name: 'ঔ-কার (ৌ)', char: 'ৌ', key: 'C + বর্ণ + Shift+X', rule: '⚡ যৌগিক: C (ে) চেপে বর্ণ চেপে Shift+X (ৗ) চাপলে ৌ হয় (যেমন: কৌ)' },
     { name: 'র-ফলা (্র)', char: '্র', key: 'Z', rule: 'বর্ণের পরে বসে (ক + Z = ক্র, গ + Z = গ্র)' },
-    { name: 'রেফ (র্)', char: 'র্', key: 'Shift + Z', rule: '⚡ প্রি-ফলা: বর্ণের আগে চাপতে হয় (Shift+Z + ক = র্ক)' }
+    { name: 'য-ফলা (্য)', char: '্য', key: 'Shift + Z (বা G + W)', rule: 'বর্ণের পরে বসে (ক + Shift+Z = ক্য)' },
+    { name: 'রেফ (র্)', char: 'র্', key: 'Shift + A', rule: '⚡ প্রি-ফলা: বর্ণের আগে চাপতে হয় (Shift+A + ক = র্ক)' }
   ];
 
   const conjunctsData = [
@@ -102,7 +103,8 @@ export const CheatSheetModal: React.FC<CheatSheetModalProps> = ({ isBn, onClose 
     { char: '। (দাঁড়ি)', key: 'Shift + G' },
     { char: '৳ (টাকা)', key: 'Shift + 4 (বা $)' },
     { char: 'ঁ (চন্দ্রবিন্দু)', key: 'Shift + 7' },
-    { char: 'ঃ (বিসর্গ)', key: 'Quote (\')' }
+    { char: 'ঃ (বিসর্গ)', key: '/' },
+    { char: 'ৎ (খণ্ড-ত)', key: 'Shift + /' }
   ];
 
   // Filter items by search query
