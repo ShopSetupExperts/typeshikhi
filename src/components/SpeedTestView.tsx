@@ -61,6 +61,8 @@ export const SpeedTestView: React.FC<SpeedTestViewProps> = ({
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
   const [isShiftPressed, setIsShiftPressed] = useState<boolean>(false);
   const [activeStepInGrapheme, setActiveStepInGrapheme] = useState<number>(0);
+  const [isKeyError, setIsKeyError] = useState<boolean>(false);
+  const errorTimeoutRef = useRef<number | null>(null);
 
   const targetGraphemes = BijoyEngine.splitGraphemes(activePassage.text);
   const currentTargetGrapheme = targetGraphemes[currentGraphemeIndex] || '';
@@ -75,6 +77,11 @@ export const SpeedTestView: React.FC<SpeedTestViewProps> = ({
     setActiveStepInGrapheme(0);
     setKeystrokeCount(0);
     setErrorCount(0);
+    setIsKeyError(false);
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = null;
+    }
     setIsStarted(false);
     setIsCompleted(false);
     setTimeLeft(selectedDuration);
@@ -89,15 +96,9 @@ export const SpeedTestView: React.FC<SpeedTestViewProps> = ({
     setIsCompleted(true);
     const durationMinutes = selectedDuration / 60;
     const grossWpm = Math.round((keystrokeCount / 5) / durationMinutes);
-
-    let correctCount = 0;
-    for (let i = 0; i < typedGraphemes.length; i++) {
-      if (i < targetGraphemes.length && typedGraphemes[i] === targetGraphemes[i]) {
-        correctCount++;
-      }
-    }
-    const accuracy =
-      typedGraphemes.length > 0 ? Math.round((correctCount / typedGraphemes.length) * 100) : 0;
+    const accuracy = keystrokeCount > 0
+      ? Math.max(0, Math.min(100, Math.round(((keystrokeCount - errorCount) / keystrokeCount) * 100)))
+      : 100;
 
     const targetWords = activePassage.text.trim().split(/\s+/);
     const typedWords = engineRef.current.getBuffer().trim().split(/\s+/);
@@ -195,10 +196,21 @@ export const SpeedTestView: React.FC<SpeedTestViewProps> = ({
       setKeystrokeCount((prev) => prev + 1);
 
       if (e.code === 'Backspace') {
-        engineRef.current.handleBackspace();
         if (activeStepInGrapheme > 0) {
-          setActiveStepInGrapheme((prev) => Math.max(0, prev - 1));
-        } else if (typedGraphemes.length > 0) {
+          while (
+            engineRef.current.getPendingState().kar ||
+            engineRef.current.getPendingState().reph ||
+            engineRef.current.getPendingState().linker
+          ) {
+            engineRef.current.handleBackspace();
+          }
+          engineRef.current.setBuffer(typedGraphemes.join(''));
+          setActiveStepInGrapheme(0);
+          return;
+        }
+
+        if (typedGraphemes.length > 0) {
+          engineRef.current.handleBackspace();
           const next = [...typedGraphemes];
           next.pop();
           setTypedGraphemes(next);
@@ -215,32 +227,36 @@ export const SpeedTestView: React.FC<SpeedTestViewProps> = ({
         (expectedStep.shift === undefined || expectedStep.shift === e.shiftKey)
       );
 
+      if (!isExpectedKey) {
+        soundManager.playErrorSound();
+        setErrorCount((prev) => prev + 1);
+        setIsKeyError(true);
+        if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+        errorTimeoutRef.current = window.setTimeout(() => setIsKeyError(false), 250);
+        return;
+      }
+
+      setIsKeyError(false);
       engineRef.current.processKey(e.code, e.shiftKey, expectedStep?.char);
-      const fullText = engineRef.current.getBuffer();
-      const newTyped = BijoyEngine.splitGraphemes(fullText);
-      const targetChar = targetGraphemes[currentGraphemeIndex];
 
       const isMultiStep = currentKeySteps.length > 1;
       const isIntermediateStep = isMultiStep && isExpectedKey && activeStepInGrapheme + 1 < currentKeySteps.length;
 
       if (isIntermediateStep) {
         setActiveStepInGrapheme((prev) => prev + 1);
-        setTypedGraphemes(newTyped);
         return;
       }
 
-      const isMatch = !!(targetChar && newTyped[currentGraphemeIndex] === targetChar);
-      if (targetChar && !isMatch) {
-        soundManager.playErrorSound();
-        setErrorCount((prev) => prev + 1);
-      }
+      // Final step: grapheme completed
+      const fullText = engineRef.current.getBuffer();
+      const newTyped = BijoyEngine.splitGraphemes(fullText);
 
       setTypedGraphemes(newTyped);
-      const nextIndex = Math.max(newTyped.length, currentGraphemeIndex + 1);
+      const nextIndex = currentGraphemeIndex + 1;
       setCurrentGraphemeIndex(nextIndex);
       setActiveStepInGrapheme(0);
 
-      if (newTyped.length >= targetGraphemes.length || nextIndex >= targetGraphemes.length) {
+      if (nextIndex >= targetGraphemes.length) {
         finishTest();
       }
     },
@@ -395,7 +411,7 @@ export const SpeedTestView: React.FC<SpeedTestViewProps> = ({
                 const isIncorrect = isTyped && !isCorrect;
 
                 let statusClass = 'text-slate-400';
-                if (isCurrent) statusClass = 'current text-cyan-300 font-bold';
+                if (isCurrent) statusClass = `current text-cyan-300 font-bold ${isKeyError ? 'error-shake' : ''}`;
                 else if (isCorrect) statusClass = 'correct';
                 else if (isIncorrect) statusClass = 'incorrect';
 

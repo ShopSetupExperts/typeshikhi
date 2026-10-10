@@ -62,6 +62,8 @@ export const LessonView: React.FC<LessonViewProps> = ({
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
   const [isShiftPressed, setIsShiftPressed] = useState<boolean>(false);
   const [pendingPreKar, setPendingPreKar] = useState<string | null>(null);
+  const [isKeyError, setIsKeyError] = useState<boolean>(false);
+  const errorTimeoutRef = useRef<number | null>(null);
 
   // Timer & active state
   const [isStarted, setIsStarted] = useState<boolean>(false);
@@ -93,6 +95,11 @@ export const LessonView: React.FC<LessonViewProps> = ({
     setBackspaceCount(0);
     setWeakKeys({});
     setPendingPreKar(null);
+    setIsKeyError(false);
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = null;
+    }
     setIsStarted(false);
     setIsPaused(false);
     setElapsedSeconds(0);
@@ -160,18 +167,28 @@ export const LessonView: React.FC<LessonViewProps> = ({
 
       if (e.code === 'Backspace') {
         setBackspaceCount((prev) => prev + 1);
-        engineRef.current.handleBackspace();
-        const pending = engineRef.current.getPendingState();
-        setPendingPreKar(pending.kar);
-
         if (activeStepInGrapheme > 0) {
-          setActiveStepInGrapheme((prev) => Math.max(0, prev - 1));
-        } else if (typedGraphemes.length > 0) {
+          while (
+            engineRef.current.getPendingState().kar ||
+            engineRef.current.getPendingState().reph ||
+            engineRef.current.getPendingState().linker
+          ) {
+            engineRef.current.handleBackspace();
+          }
+          engineRef.current.setBuffer(typedGraphemes.join(''));
+          setActiveStepInGrapheme(0);
+          setPendingPreKar(null);
+          return;
+        }
+
+        if (typedGraphemes.length > 0) {
+          engineRef.current.handleBackspace();
           const nextTyped = [...typedGraphemes];
           nextTyped.pop();
           setTypedGraphemes(nextTyped);
           setCurrentGraphemeIndex(Math.max(0, currentGraphemeIndex - 1));
           setActiveStepInGrapheme(0);
+          setPendingPreKar(null);
         }
         return;
       }
@@ -183,13 +200,33 @@ export const LessonView: React.FC<LessonViewProps> = ({
         (expectedStep.shift === undefined || expectedStep.shift === e.shiftKey)
       );
 
+      const targetChar = targetGraphemes[currentGraphemeIndex];
+
+      if (!isExpectedKey) {
+        soundManager.playErrorSound();
+        setErrorCount((prev) => prev + 1);
+        if (targetChar) {
+          setWeakKeys((prev) => {
+            const existing = prev[targetChar] || { attempts: 0, errors: 0 };
+            return {
+              ...prev,
+              [targetChar]: {
+                attempts: existing.attempts + 1,
+                errors: existing.errors + 1
+              }
+            };
+          });
+        }
+        setIsKeyError(true);
+        if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+        errorTimeoutRef.current = window.setTimeout(() => setIsKeyError(false), 250);
+        return;
+      }
+
+      setIsKeyError(false);
       engineRef.current.processKey(e.code, e.shiftKey, expectedStep?.char);
       const pendingState = engineRef.current.getPendingState();
       setPendingPreKar(pendingState.kar);
-
-      const currentFullText = engineRef.current.getBuffer();
-      const newTypedGraphemes = BijoyEngine.splitGraphemes(currentFullText);
-      const targetChar = targetGraphemes[currentGraphemeIndex];
 
       // Multi-step grapheme check (e.g. 'আ' = G + F, 'কো' = C + J + F, 'ক্ষ' = J + G + Shift+N)
       const isMultiStep = currentKeySteps.length > 1;
@@ -197,37 +234,19 @@ export const LessonView: React.FC<LessonViewProps> = ({
 
       if (isIntermediateStep) {
         setActiveStepInGrapheme((prev) => prev + 1);
-        setTypedGraphemes(newTypedGraphemes);
         return;
       }
 
-      // Final step of current grapheme, or single key grapheme, or mistyped key
-      const isMatch = !!(targetChar && newTypedGraphemes[currentGraphemeIndex] === targetChar);
-
-      if (targetChar) {
-        setWeakKeys((prev) => {
-          const existing = prev[targetChar] || { attempts: 0, errors: 0 };
-          return {
-            ...prev,
-            [targetChar]: {
-              attempts: existing.attempts + 1,
-              errors: isMatch ? existing.errors : existing.errors + 1
-            }
-          };
-        });
-
-        if (!isMatch) {
-          soundManager.playErrorSound();
-          setErrorCount((prev) => prev + 1);
-        }
-      }
+      // Final step: grapheme completed
+      const currentFullText = engineRef.current.getBuffer();
+      const newTypedGraphemes = BijoyEngine.splitGraphemes(currentFullText);
 
       setTypedGraphemes(newTypedGraphemes);
-      const nextIndex = Math.max(newTypedGraphemes.length, currentGraphemeIndex + 1);
+      const nextIndex = currentGraphemeIndex + 1;
       setCurrentGraphemeIndex(nextIndex);
       setActiveStepInGrapheme(0);
 
-      if (newTypedGraphemes.length >= targetGraphemes.length || nextIndex >= targetGraphemes.length) {
+      if (nextIndex >= targetGraphemes.length) {
         const metrics = BijoyEngine.calculateMetrics(
           targetText,
           currentFullText,
@@ -279,14 +298,9 @@ export const LessonView: React.FC<LessonViewProps> = ({
   // Live Metrics calculations
   const minutes = Math.max(elapsedSeconds / 60, 0.01);
   const liveGrossWpm = isStarted ? Math.round((keystrokeCount / 5) / minutes) : 0;
-  let correctCount = 0;
-  for (let i = 0; i < typedGraphemes.length; i++) {
-    if (i < targetGraphemes.length && typedGraphemes[i] === targetGraphemes[i]) {
-      correctCount++;
-    }
-  }
-  const liveAccuracy =
-    typedGraphemes.length > 0 ? Math.round((correctCount / typedGraphemes.length) * 100) : 100;
+  const liveAccuracy = keystrokeCount > 0
+    ? Math.max(0, Math.min(100, Math.round(((keystrokeCount - errorCount) / keystrokeCount) * 100)))
+    : 100;
   const progressPercent = Math.min(100, Math.round((typedGraphemes.length / targetGraphemes.length) * 100));
 
   return (
@@ -423,7 +437,7 @@ export const LessonView: React.FC<LessonViewProps> = ({
             const isIncorrect = isTyped && !isCorrect;
 
             let statusClass = 'text-slate-400/90';
-            if (isCurrent) statusClass = 'current text-cyan-300 font-bold';
+            if (isCurrent) statusClass = `current text-cyan-300 font-bold ${isKeyError ? 'error-shake' : ''}`;
             else if (isCorrect) statusClass = 'correct';
             else if (isIncorrect) statusClass = 'incorrect';
 

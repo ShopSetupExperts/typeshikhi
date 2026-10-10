@@ -193,6 +193,21 @@ body {
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
 }
 
+.target-char.error-shake {
+  animation: error-shake 0.25s ease-in-out;
+  color: #fb7185 !important;
+  background: rgba(244, 63, 94, 0.35) !important;
+  border-radius: 4px;
+  outline: 2px solid rgba(244, 63, 94, 0.8) !important;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.6) !important;
+}
+
+@keyframes error-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-3px); }
+  40%, 80% { transform: translateX(3px); }
+}
+
 @keyframes cursor-blink {
   0%, 100% {
     outline: 2px solid rgba(56, 189, 248, 0.8);
