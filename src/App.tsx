@@ -13,6 +13,7 @@ import { LessonView } from './components/LessonView';
 import { SpeedTestView } from './components/SpeedTestView';
 import { WeakKeyDrillView } from './components/WeakKeyDrillView';
 import { CustomPracticeView } from './components/CustomPracticeView';
+import { EnglishTypingView } from './components/EnglishTypingView';
 import { ResultModal } from './components/ResultModal';
 import { CheatSheetModal } from './components/CheatSheetModal';
 import { ProfileStatsModal } from './components/ProfileStatsModal';
@@ -210,6 +211,16 @@ export const App: React.FC = () => {
     }));
   };
 
+  const handleUpdateEnglishBestWpm = (wpm: number) => {
+    setState((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        englishBestWpm: Math.max(prev.profile.englishBestWpm || 0, wpm)
+      }
+    }));
+  };
+
   const isBn = state.settings.language === 'bn';
 
   return (
@@ -283,6 +294,15 @@ export const App: React.FC = () => {
             state={state}
             onStartCustomPractice={handleStartWeakDrill}
             onBackToDashboard={() => handleNavigate('dashboard')}
+          />
+        )}
+
+        {state.currentView === 'english-typing' && (
+          <EnglishTypingView
+            state={state}
+            onBackToDashboard={() => handleNavigate('dashboard')}
+            onUpdateEnglishBestWpm={handleUpdateEnglishBestWpm}
+            onSaveCertificate={handleSaveCertificate}
           />
         )}
       </main>

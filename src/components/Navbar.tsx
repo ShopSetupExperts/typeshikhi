@@ -12,7 +12,8 @@ import {
   VolumeX,
   Languages,
   Palette,
-  Settings
+  Settings,
+  Zap
 } from 'lucide-react';
 import type { AppState } from '../store/useTypingStore';
 import { soundManager } from '../engine/sound-synthesizer';
@@ -129,6 +130,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <FileEdit className="w-3.5 h-3.5" />
               <span>{isBn ? 'কাস্টম টেক্সট' : 'Custom Text'}</span>
+            </button>
+
+            <button
+              onClick={() => onNavigate('english-typing')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
+                state.currentView === 'english-typing'
+                  ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-sm'
+                  : 'text-amber-300 hover:text-white hover:bg-amber-950/40 border border-amber-500/20'
+              }`}
+            >
+              <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <span>{isBn ? 'ইংরেজি স্পিড' : 'English Speed'}</span>
+              <span className="text-[9px] px-1 rounded bg-amber-400 text-slate-950 font-black">
+                ENG
+              </span>
             </button>
           </nav>
         </div>

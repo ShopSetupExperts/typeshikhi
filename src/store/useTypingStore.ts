@@ -32,6 +32,7 @@ export interface UserProfile {
   totalKeystrokes: number;
   totalWords: number;
   totalTimeMinutes: number;
+  englishBestWpm?: number;
 }
 
 const BADGES_LIST: UserBadge[] = [
@@ -112,7 +113,7 @@ const BADGES_LIST: UserBadge[] = [
 const STORAGE_KEY = 'typeshikhi_user_state_v1';
 
 export interface AppState {
-  currentView: 'dashboard' | 'curriculum' | 'lesson' | 'speed-test' | 'weak-keys' | 'custom-practice' | 'cheat-sheet' | 'profile';
+  currentView: 'dashboard' | 'curriculum' | 'lesson' | 'speed-test' | 'weak-keys' | 'custom-practice' | 'cheat-sheet' | 'profile' | 'english-typing';
   activeLesson: Lesson | null;
   unlockedLevels: number[];
   completedLessons: Record<string, { stars: number; bestWpm: number; bestAccuracy: number; attempts: number }>;

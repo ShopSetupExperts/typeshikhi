@@ -13,7 +13,8 @@ import {
   TrendingUp,
   CheckCircle2,
   ChevronRight,
-  Keyboard
+  Keyboard,
+  Zap
 } from 'lucide-react';
 import { CURRICULUM } from '../data/curriculum';
 import type { Lesson } from '../data/curriculum';
@@ -234,6 +235,56 @@ export const HomeDashboardView: React.FC<HomeDashboardViewProps> = ({
               {isBn ? 'নিজের ডকুমেন্ট বা পরীক্ষার অনুচ্ছেদ পেস্ট করে টাইপ' : 'Paste any Bangla paragraph or exam text'}
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* 2.5 Dedicated English Typing Speed Section */}
+      <div className="w-full rounded-3xl glass-panel border border-amber-500/30 bg-gradient-to-br from-amber-950/20 via-slate-900/90 to-slate-950 p-6 relative overflow-hidden shadow-xl">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
+              <Zap className="w-7 h-7 text-white fill-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-wider font-mono">
+                  NEW SECTION • ENGLISH TYPING SPEED
+                </span>
+                <span className="text-xs text-amber-400 font-mono font-bold">
+                  QWERTY Pro
+                </span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                {isBn ? 'ইংরেজি টাইপিং গতি বাড়ানোর বিশেষ সেকশন' : 'Dedicated English Typing Speed System'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                {isBn
+                  ? 'হোম রো, টপ রো ও বটম রো টাচ-টাইপিং ড্রিল, শীর্ষ ১০০টি প্রয়োজনীয় ইংরেজি শব্দ এবং ১/৩/৫ মিনিটের লাইভ স্পিড টেস্ট দিয়ে ইংরেজি টাইপিং গতি দ্বিগুণ করুন।'
+                  : 'Boost your English WPM with curated touch typing drills (Home/Top/Bottom row, Pangrams, Top 100 words) and certified 1-5 min speed tests.'}
+              </p>
+              <div className="flex flex-wrap items-center gap-3 mt-3 text-xs">
+                <span className="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-slate-800 text-amber-300 font-mono">
+                  🏆 {isBn ? 'ইংরেজি সেরা গতি:' : 'Best WPM:'} {state.profile.englishBestWpm || 0} WPM
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-300">
+                  🎯 7+ {isBn ? 'টাচ ড্রিল' : 'Touch Drills'}
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-300">
+                  ⏱️ 1/3/5 min {isBn ? 'স্পিড টেস্ট' : 'Speed Tests'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => onNavigate('english-typing')}
+            className="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-bold text-sm shadow-xl shadow-amber-500/20 flex items-center justify-center gap-2 transition-all transform hover:scale-105 shrink-0"
+          >
+            <Zap className="w-4 h-4 fill-slate-950" />
+            <span>{isBn ? 'ইংরেজি স্পিড অনুশীলন শুরু করুন' : 'Start English Typing'}</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
 

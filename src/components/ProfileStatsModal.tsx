@@ -37,6 +37,7 @@ export const ProfileStatsModal: React.FC<ProfileStatsModalProps> = ({
   };
 
   const totalStars = Object.values(state.completedLessons).reduce((acc, curr) => acc + curr.stars, 0);
+  const banglaBestWpm = Object.values(state.completedLessons).reduce((max, curr) => Math.max(max, curr.bestWpm), 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
@@ -107,15 +108,21 @@ export const ProfileStatsModal: React.FC<ProfileStatsModalProps> = ({
               </div>
             </div>
 
-            {/* Streak & Stars */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold font-mono">
-                <Flame className="w-4 h-4 fill-amber-400" />
-                <span>{state.profile.streakDays} Days Streak</span>
+            {/* Streak, Stars & Speeds */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold font-mono">
+                <Flame className="w-3.5 h-3.5 fill-amber-400" />
+                <span>{state.profile.streakDays}d</span>
               </div>
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 text-xs font-bold font-mono">
-                <Star className="w-4 h-4 fill-yellow-400" />
-                <span>{totalStars} Stars</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 text-xs font-bold font-mono">
+                <Star className="w-3.5 h-3.5 fill-yellow-400" />
+                <span>{totalStars} ★</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold font-mono" title="Bijoy Bangla Best Speed">
+                <span>বিজয়: {banglaBestWpm} WPM</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-bold font-mono" title="English Best Speed">
+                <span>ENG: {state.profile.englishBestWpm || 0} WPM</span>
               </div>
             </div>
           </div>

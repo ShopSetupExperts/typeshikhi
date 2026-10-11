@@ -10,7 +10,32 @@ interface OnScreenKeyboardProps {
   size?: 'compact' | 'standard' | 'large';
   onKeyClick?: (code: string, shift: boolean) => void;
   showFingerGuide?: boolean;
+  layoutMode?: 'bijoy' | 'english';
 }
+
+const ENGLISH_KEY_DISPLAY: Record<string, { normal: string; shift: string }> = {
+  Backquote: { normal: '`', shift: '~' },
+  Digit1: { normal: '1', shift: '!' },
+  Digit2: { normal: '2', shift: '@' },
+  Digit3: { normal: '3', shift: '#' },
+  Digit4: { normal: '4', shift: '$' },
+  Digit5: { normal: '5', shift: '%' },
+  Digit6: { normal: '6', shift: '^' },
+  Digit7: { normal: '7', shift: '&' },
+  Digit8: { normal: '8', shift: '*' },
+  Digit9: { normal: '9', shift: '(' },
+  Digit0: { normal: '0', shift: ')' },
+  Minus: { normal: '-', shift: '_' },
+  Equal: { normal: '=', shift: '+' },
+  BracketLeft: { normal: '[', shift: '{' },
+  BracketRight: { normal: ']', shift: '}' },
+  Backslash: { normal: '\\', shift: '|' },
+  Semicolon: { normal: ';', shift: ':' },
+  Quote: { normal: "'", shift: '"' },
+  Comma: { normal: ',', shift: '<' },
+  Period: { normal: '.', shift: '>' },
+  Slash: { normal: '/', shift: '?' },
+};
 
 export const OnScreenKeyboard: React.FC<OnScreenKeyboardProps> = ({
   targetSteps = [],
@@ -19,7 +44,8 @@ export const OnScreenKeyboard: React.FC<OnScreenKeyboardProps> = ({
   isShiftPressed,
   size = 'standard',
   onKeyClick,
-  showFingerGuide = true
+  showFingerGuide = true,
+  layoutMode = 'bijoy'
 }) => {
   const currentStep = targetSteps[activeStepIndex];
   const targetCode = currentStep?.code;
@@ -121,6 +147,9 @@ export const OnScreenKeyboard: React.FC<OnScreenKeyboardProps> = ({
                 );
               }
 
+              const engDef = ENGLISH_KEY_DISPLAY[code];
+              const isLetterKey = code.startsWith('Key');
+
               return (
                 <button
                   key={code}
@@ -132,38 +161,85 @@ export const OnScreenKeyboard: React.FC<OnScreenKeyboardProps> = ({
                   className={`keycap ${getKeyWidth(code)} ${sizeClasses.key} ${
                     isPressed ? 'is-pressed' : ''
                   } ${isTarget ? 'is-target' : ''} transition-all duration-75 relative group px-0.5`}
-                  title={`${keyDef.labelEn}: ${keyDef.normal} | Shift+${keyDef.labelEn}: ${keyDef.shift} (${
-                    fingerInfo?.label || ''
-                  })`}
+                  title={
+                    layoutMode === 'english'
+                      ? `${keyDef.labelEn} (${fingerInfo?.label || ''})`
+                      : `${keyDef.labelEn}: ${keyDef.normal} | Shift+${keyDef.labelEn}: ${keyDef.shift} (${
+                          fingerInfo?.label || ''
+                        })`
+                  }
                 >
-                  {/* Top Row: English key label & Shifted Bangla char */}
-                  <div className="w-full flex items-center justify-between px-1 -mt-0.5">
-                    <span className={`${sizeClasses.enText} font-mono text-slate-400/80 uppercase`}>
-                      {keyDef.labelEn}
-                    </span>
-                    <span
-                      className={`text-[9px] sm:text-[10px] font-bangla transition-opacity ${
-                        isShiftPressed
-                          ? 'text-cyan-300 font-bold scale-110'
-                          : 'text-slate-400 opacity-70'
-                      }`}
-                    >
-                      {keyDef.shift}
-                    </span>
-                  </div>
+                  {layoutMode === 'english' ? (
+                    // English QWERTY Layout Display
+                    engDef ? (
+                      // Numbers and Punctuation symbols (Shifted top, Normal bottom)
+                      <div className="w-full h-full flex flex-col justify-between py-0.5 items-center">
+                        <span
+                          className={`text-[9px] sm:text-[10px] font-mono leading-none transition-colors ${
+                            isShiftPressed ? 'text-cyan-300 font-bold scale-110' : 'text-slate-400'
+                          }`}
+                        >
+                          {engDef.shift}
+                        </span>
+                        <span
+                          className={`text-xs sm:text-sm font-mono font-bold leading-none ${
+                            !isShiftPressed ? 'text-white' : 'text-slate-400 opacity-70'
+                          }`}
+                        >
+                          {engDef.normal}
+                        </span>
+                      </div>
+                    ) : isLetterKey ? (
+                      // Letters (Clean bold uppercase letter centered)
+                      <div className="flex items-center justify-center my-auto">
+                        <span
+                          className={`font-mono text-sm sm:text-base md:text-lg font-bold tracking-wider ${
+                            isTarget ? 'text-white drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]' : 'text-slate-100'
+                          }`}
+                        >
+                          {isShiftPressed ? keyDef.labelEn.toUpperCase() : keyDef.labelEn.toUpperCase()}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center my-auto">
+                        <span className="font-mono text-xs font-bold text-slate-300">
+                          {keyDef.labelEn}
+                        </span>
+                      </div>
+                    )
+                  ) : (
+                    // Bangla Bijoy Layout Display
+                    <>
+                      {/* Top Row: English key label & Shifted Bangla char */}
+                      <div className="w-full flex items-center justify-between px-1 -mt-0.5">
+                        <span className={`${sizeClasses.enText} font-mono text-slate-400/80 uppercase`}>
+                          {keyDef.labelEn}
+                        </span>
+                        <span
+                          className={`text-[9px] sm:text-[10px] font-bangla transition-opacity ${
+                            isShiftPressed
+                              ? 'text-cyan-300 font-bold scale-110'
+                              : 'text-slate-400 opacity-70'
+                          }`}
+                        >
+                          {keyDef.shift}
+                        </span>
+                      </div>
 
-                  {/* Main Center: Normal Bangla Glyph */}
-                  <div className="flex items-center justify-center my-auto">
-                    <span
-                      className={`font-bangla ${sizeClasses.banglaText} ${
-                        !isShiftPressed
-                          ? 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'
-                          : 'text-slate-400 opacity-60'
-                      }`}
-                    >
-                      {keyDef.normal}
-                    </span>
-                  </div>
+                      {/* Main Center: Normal Bangla Glyph */}
+                      <div className="flex items-center justify-center my-auto">
+                        <span
+                          className={`font-bangla ${sizeClasses.banglaText} ${
+                            !isShiftPressed
+                              ? 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]'
+                              : 'text-slate-400 opacity-60'
+                          }`}
+                        >
+                          {keyDef.normal}
+                        </span>
+                      </div>
+                    </>
+                  )}
 
                   {/* Finger Dot indicator */}
                   {showFingerGuide && fingerInfo && (
