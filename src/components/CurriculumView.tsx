@@ -19,7 +19,7 @@ interface CurriculumViewProps {
   onBackToDashboard: () => void;
 }
 
-type CategoryFilter = 'all' | 'home' | 'top_bottom' | 'shift' | 'digits' | 'kar_fola' | 'conjuncts' | 'words_sentences' | 'speed_exam';
+type CategoryFilter = 'all' | 'home' | 'top_bottom' | 'swaro' | 'shift' | 'digits' | 'kar_fola' | 'conjuncts' | 'words_sentences' | 'speed_exam';
 type StatusFilter = 'all' | 'unlocked' | 'completed' | 'pending';
 
 export const CurriculumView: React.FC<CurriculumViewProps> = ({
@@ -43,8 +43,9 @@ export const CurriculumView: React.FC<CurriculumViewProps> = ({
   // Filter categories helper
   const matchesCategoryGroup = (level: number, group: CategoryFilter): boolean => {
     if (group === 'all') return true;
-    if (group === 'home') return level >= 0 && level <= 2;
-    if (group === 'top_bottom') return level >= 3 && level <= 4;
+    if (group === 'home') return level >= 0 && level <= 1;
+    if (group === 'top_bottom') return level >= 2 && level <= 3;
+    if (group === 'swaro') return level === 4;
     if (group === 'shift') return level === 5;
     if (group === 'digits') return level === 6;
     if (group === 'kar_fola') return level === 7;
@@ -205,8 +206,9 @@ export const CurriculumView: React.FC<CurriculumViewProps> = ({
 
           {[
             { id: 'all', labelBn: 'সকল লেভেল (১৩)', labelEn: 'All (13)' },
-            { id: 'home', labelBn: 'হোম রো (L0-2)', labelEn: 'Home Row (L0-2)' },
-            { id: 'top_bottom', labelBn: 'টপ ও বটম (L3-4)', labelEn: 'Top/Bottom (L3-4)' },
+            { id: 'home', labelBn: 'হোম রো (L0-1)', labelEn: 'Home Row (L0-1)' },
+            { id: 'top_bottom', labelBn: 'টপ ও বটম (L2-3)', labelEn: 'Top/Bottom (L2-3)' },
+            { id: 'swaro', labelBn: 'স্বরবর্ণ (L4)', labelEn: 'Vowels (L4)' },
             { id: 'shift', labelBn: 'শিফট লেয়ার (L5)', labelEn: 'Shift (L5)' },
             { id: 'digits', labelBn: 'সংখ্যা (L6)', labelEn: 'Digits (L6)' },
             { id: 'kar_fola', labelBn: 'কার ও ফলা (L7)', labelEn: 'Kar/Fola (L7)' },

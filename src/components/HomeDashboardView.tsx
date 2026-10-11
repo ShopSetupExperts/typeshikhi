@@ -145,7 +145,7 @@ export const HomeDashboardView: React.FC<HomeDashboardViewProps> = ({
               <BookOpen className="w-6 h-6" />
             </div>
             <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bangla">
-              {isBn ? '৩৩টি লেসন' : '33 Lessons'}
+              {isBn ? `${allLessons.length}টি লেসন` : `${allLessons.length} Lessons`}
             </span>
           </div>
           <div>
