@@ -63,6 +63,8 @@ export const SpeedTestView: React.FC<SpeedTestViewProps> = ({
   const [activeStepInGrapheme, setActiveStepInGrapheme] = useState<number>(0);
   const [isKeyError, setIsKeyError] = useState<boolean>(false);
   const errorTimeoutRef = useRef<number | null>(null);
+  const textContainerRef = useRef<HTMLDivElement>(null);
+  const currentCharRef = useRef<HTMLSpanElement>(null);
 
   const targetGraphemes = BijoyEngine.splitGraphemes(activePassage.text);
   const currentTargetGrapheme = targetGraphemes[currentGraphemeIndex] || '';
@@ -86,7 +88,42 @@ export const SpeedTestView: React.FC<SpeedTestViewProps> = ({
     setIsCompleted(false);
     setTimeLeft(selectedDuration);
     setTestResult(null);
+    if (textContainerRef.current) {
+      textContainerRef.current.scrollTo({ top: 0 });
+    }
   }, [selectedDuration]);
+
+  // Smooth line auto-scrolling
+  useEffect(() => {
+    const container = textContainerRef.current;
+    const span = currentCharRef.current;
+    if (!container || !span) return;
+
+    if (currentGraphemeIndex === 0) {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const containerRect = container.getBoundingClientRect();
+    const spanRect = span.getBoundingClientRect();
+    const spanRelativeTop = spanRect.top - containerRect.top;
+    const spanRelativeBottom = spanRect.bottom - containerRect.top;
+    const containerHeight = container.clientHeight;
+
+    if (spanRelativeBottom > containerHeight * 0.5) {
+      const scrollDiff = spanRelativeTop - (containerHeight * 0.3);
+      container.scrollTo({
+        top: container.scrollTop + scrollDiff,
+        behavior: 'smooth'
+      });
+    } else if (spanRelativeTop < containerHeight * 0.15 && container.scrollTop > 0) {
+      const scrollDiff = spanRelativeTop - (containerHeight * 0.2);
+      container.scrollTo({
+        top: Math.max(0, container.scrollTop + scrollDiff),
+        behavior: 'smooth'
+      });
+    }
+  }, [currentGraphemeIndex]);
 
   useEffect(() => {
     handleReset();
@@ -401,6 +438,7 @@ export const SpeedTestView: React.FC<SpeedTestViewProps> = ({
           {/* Test Passage Stream Box */}
           <div className="w-full glass-panel rounded-2xl p-3 sm:p-4 border border-slate-700 bg-slate-950/90 shadow-xl relative shrink-0">
             <div
+              ref={textContainerRef}
               className="font-bangla leading-snug text-left tracking-wide min-h-[60px] sm:min-h-[70px] max-h-[90px] overflow-y-auto flex flex-wrap items-center gap-y-1.5 text-xl sm:text-2xl select-none"
               style={{ fontFamily: state.settings.fontFamily }}
             >
@@ -418,6 +456,7 @@ export const SpeedTestView: React.FC<SpeedTestViewProps> = ({
                 return (
                   <span
                     key={idx}
+                    ref={isCurrent ? currentCharRef : undefined}
                     className={`target-char ${statusClass} ${
                       grapheme === ' ' ? 'w-2.5 sm:w-3 inline-block' : ''
                     }`}

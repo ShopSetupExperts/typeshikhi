@@ -167,6 +167,9 @@ export const EnglishTypingView: React.FC<EnglishTypingViewProps> = ({
     setTimeLeft(activeMode === 'speed-test' ? testDuration : 0);
     setResultMetrics(null);
     setShowCertModal(false);
+    if (textContainerRef.current) {
+      textContainerRef.current.scrollTo({ top: 0 });
+    }
   }, [activeMode, testDuration]);
 
   // Reset session when mode, lesson, passage, drill or duration changes
@@ -304,16 +307,39 @@ export const EnglishTypingView: React.FC<EnglishTypingViewProps> = ({
     };
   }, [isStarted, isCompleted, activeMode, finishSession]);
 
-  // Keep target char scrolled into view smoothly
+  // Keep target char scrolled into view smoothly tracking with the typing line
   useEffect(() => {
-    if (currentCharSpanRef.current && textContainerRef.current) {
-      const container = textContainerRef.current;
-      const span = currentCharSpanRef.current;
-      const spanTop = span.offsetTop - container.offsetTop;
-      const targetScroll = spanTop - container.clientHeight / 2 + 30;
+    const container = textContainerRef.current;
+    const span = currentCharSpanRef.current;
+    if (!container || !span) return;
 
+    if (charIndex === 0) {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Get bounding rects to calculate exact visual position inside container
+    const containerRect = container.getBoundingClientRect();
+    const spanRect = span.getBoundingClientRect();
+
+    // Position of span relative to the visible container
+    const spanRelativeTop = spanRect.top - containerRect.top;
+    const spanRelativeBottom = spanRect.bottom - containerRect.top;
+    const containerHeight = container.clientHeight;
+
+    // Comfortable target line position: keep active line around 35%-40% of container height
+    // If the active character goes below 50% of the visible container height:
+    if (spanRelativeBottom > containerHeight * 0.5) {
+      const scrollDiff = spanRelativeTop - (containerHeight * 0.35);
       container.scrollTo({
-        top: Math.max(0, targetScroll),
+        top: container.scrollTop + scrollDiff,
+        behavior: 'smooth'
+      });
+    } else if (spanRelativeTop < containerHeight * 0.15 && container.scrollTop > 0) {
+      // If navigating backwards or line jumped up
+      const scrollDiff = spanRelativeTop - (containerHeight * 0.25);
+      container.scrollTo({
+        top: Math.max(0, container.scrollTop + scrollDiff),
         behavior: 'smooth'
       });
     }

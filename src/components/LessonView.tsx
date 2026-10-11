@@ -64,6 +64,8 @@ export const LessonView: React.FC<LessonViewProps> = ({
   const [pendingPreKar, setPendingPreKar] = useState<string | null>(null);
   const [isKeyError, setIsKeyError] = useState<boolean>(false);
   const errorTimeoutRef = useRef<number | null>(null);
+  const textContainerRef = useRef<HTMLDivElement>(null);
+  const currentCharRef = useRef<HTMLSpanElement>(null);
 
   // Timer & active state
   const [isStarted, setIsStarted] = useState<boolean>(false);
@@ -108,7 +110,42 @@ export const LessonView: React.FC<LessonViewProps> = ({
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    if (textContainerRef.current) {
+      textContainerRef.current.scrollTo({ top: 0 });
+    }
   }, []);
+
+  // Smooth line auto-scrolling tracking active typing line
+  useEffect(() => {
+    const container = textContainerRef.current;
+    const span = currentCharRef.current;
+    if (!container || !span) return;
+
+    if (currentGraphemeIndex === 0) {
+      container.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const containerRect = container.getBoundingClientRect();
+    const spanRect = span.getBoundingClientRect();
+    const spanRelativeTop = spanRect.top - containerRect.top;
+    const spanRelativeBottom = spanRect.bottom - containerRect.top;
+    const containerHeight = container.clientHeight;
+
+    if (spanRelativeBottom > containerHeight * 0.5) {
+      const scrollDiff = spanRelativeTop - (containerHeight * 0.3);
+      container.scrollTo({
+        top: container.scrollTop + scrollDiff,
+        behavior: 'smooth'
+      });
+    } else if (spanRelativeTop < containerHeight * 0.15 && container.scrollTop > 0) {
+      const scrollDiff = spanRelativeTop - (containerHeight * 0.2);
+      container.scrollTo({
+        top: Math.max(0, container.scrollTop + scrollDiff),
+        behavior: 'smooth'
+      });
+    }
+  }, [currentGraphemeIndex]);
 
   useEffect(() => {
     handleReset();
@@ -421,6 +458,7 @@ export const LessonView: React.FC<LessonViewProps> = ({
 
         {/* Target Text Stream */}
         <div
+          ref={textContainerRef}
           className={`font-bangla leading-snug text-left tracking-wide min-h-[56px] sm:min-h-[64px] max-h-[85px] overflow-y-auto flex flex-wrap items-center gap-y-1.5 ${
             state.settings.fontSize === 'large'
               ? 'text-2xl sm:text-3xl'
@@ -444,6 +482,7 @@ export const LessonView: React.FC<LessonViewProps> = ({
             return (
               <span
                 key={idx}
+                ref={isCurrent ? currentCharRef : undefined}
                 className={`target-char ${statusClass} ${
                   grapheme === ' ' ? 'w-2.5 sm:w-3 inline-block' : ''
                 }`}
