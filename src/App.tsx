@@ -221,6 +221,44 @@ export const App: React.FC = () => {
     }));
   };
 
+  const handleCompleteEnglishLesson = (
+    lessonId: string,
+    level: number,
+    stars: number,
+    wpm: number,
+    accuracy: number
+  ) => {
+    setState((prev) => {
+      const prevData = prev.completedEnglishLessons?.[lessonId];
+      const newCompleted = {
+        ...(prev.completedEnglishLessons || {}),
+        [lessonId]: {
+          stars: Math.max(prevData?.stars || 0, stars),
+          bestWpm: Math.max(prevData?.bestWpm || 0, wpm),
+          bestAccuracy: Math.max(prevData?.bestAccuracy || 0, accuracy),
+          attempts: (prevData?.attempts || 0) + 1
+        }
+      };
+
+      const nextLevel = level + 1;
+      const currentUnlocked = prev.unlockedEnglishLevels || [1];
+      const newUnlocked =
+        stars > 0 && !currentUnlocked.includes(nextLevel) && nextLevel <= 7
+          ? [...currentUnlocked, nextLevel]
+          : currentUnlocked;
+
+      return {
+        ...prev,
+        completedEnglishLessons: newCompleted,
+        unlockedEnglishLevels: newUnlocked,
+        profile: {
+          ...prev.profile,
+          englishBestWpm: Math.max(prev.profile.englishBestWpm || 0, wpm)
+        }
+      };
+    });
+  };
+
   const isBn = state.settings.language === 'bn';
 
   return (
@@ -303,6 +341,7 @@ export const App: React.FC = () => {
             onBackToDashboard={() => handleNavigate('dashboard')}
             onUpdateEnglishBestWpm={handleUpdateEnglishBestWpm}
             onSaveCertificate={handleSaveCertificate}
+            onCompleteEnglishLesson={handleCompleteEnglishLesson}
           />
         )}
       </main>

@@ -112,11 +112,20 @@ const BADGES_LIST: UserBadge[] = [
 
 const STORAGE_KEY = 'typeshikhi_user_state_v1';
 
+export interface EnglishLessonProgress {
+  stars: number;
+  bestWpm: number;
+  bestAccuracy: number;
+  attempts: number;
+}
+
 export interface AppState {
   currentView: 'dashboard' | 'curriculum' | 'lesson' | 'speed-test' | 'weak-keys' | 'custom-practice' | 'cheat-sheet' | 'profile' | 'english-typing';
   activeLesson: Lesson | null;
   unlockedLevels: number[];
   completedLessons: Record<string, { stars: number; bestWpm: number; bestAccuracy: number; attempts: number }>;
+  unlockedEnglishLevels?: number[];
+  completedEnglishLessons?: Record<string, EnglishLessonProgress>;
   weakKeys: Record<string, { attempts: number; errors: number }>;
   profile: UserProfile;
   badges: UserBadge[];
@@ -139,6 +148,8 @@ const DEFAULT_STATE: AppState = {
   activeLesson: CURRICULUM[0].lessons[0],
   unlockedLevels: [0, 1], // Level 0 and 1 unlocked by default
   completedLessons: {},
+  unlockedEnglishLevels: [1], // Level 1 unlocked by default
+  completedEnglishLessons: {},
   weakKeys: {},
   profile: {
     name: 'শিক্ষার্থী (Learner)',
@@ -173,6 +184,8 @@ export function loadSavedState(): AppState {
     return {
       ...DEFAULT_STATE,
       ...parsed,
+      unlockedEnglishLevels: parsed.unlockedEnglishLevels || DEFAULT_STATE.unlockedEnglishLevels,
+      completedEnglishLessons: parsed.completedEnglishLessons || {},
       settings: { ...DEFAULT_STATE.settings, ...(parsed.settings || {}) },
       profile: { ...DEFAULT_STATE.profile, ...(parsed.profile || {}) },
       badges: BADGES_LIST.map(b => {
